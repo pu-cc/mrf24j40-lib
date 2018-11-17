@@ -21,3 +21,34 @@
  */
 
 #include "mrf24j40.h"
+
+void mrf24j40_hwrst(void)
+{
+	mrf24j40_pin_ctrl(MRF24J40_RST_PIN, 0x00);
+	mrf24j40_delay_us(250);
+	mrf24j40_pin_ctrl(MRF24J40_RST_PIN, 0x04);
+	mrf24j40_delay_ms(2);
+}
+
+void mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst)
+{
+	uint8_t reg;
+
+	if (sw_rstmsk)
+	{
+		mrf24j40_wr_short(MRF24J40_R_SOFTRST, sw_rstmsk);
+
+		while (mrf24j40_rd_short(MRF24J40_R_SOFTRST) != 0);
+	}
+
+	if (rfrst)
+	{
+		reg = mrf24j40_rd_short(MRF24J40_R_RFCTL);
+		MRF24J40_SET_RFRST(reg, 1);
+		mrf24j40_wr_short(MRF24J40_R_RFCTL, reg);
+		MRF24J40_SET_RFRST(reg, 0);
+		mrf24j40_wr_short(MRF24J40_R_RFCTL, reg);
+
+		mrf24j40_delay_us(192);
+	}
+}

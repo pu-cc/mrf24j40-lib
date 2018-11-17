@@ -45,4 +45,10 @@ extern void    mrf24j40_pin_ctrl(uint8_t pin_mask, uint8_t pin_state);
 extern void    mrf24j40_delay_ms(const double ms);
 extern void    mrf24j40_delay_us(const double us);
 
+/*
+ * Public functions
+ */
+void mrf24j40_hwrst(void);
+void mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst);
+
 #endif //_MRF24J40_H
