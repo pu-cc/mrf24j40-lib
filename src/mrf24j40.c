@@ -52,3 +52,190 @@ void mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst)
 		mrf24j40_delay_us(192);
 	}
 }
+
+void mrf24j40_init(void)
+{
+	/* perform hard- and software reset */
+	mrf24j40_hwrst();
+	mrf24j40_swrst(0x07, 0);
+
+	/* See datasheet section 3.2: Initialization */
+	mrf24j40_wr_short(MRF24J40_R_PACON2, 0x98);
+	mrf24j40_wr_short(MRF24J40_R_TXSTBL, 0x95);
+	mrf24j40_wr_long(MRF24J40_R_RFCON1,  0x02);
+	mrf24j40_wr_long(MRF24J40_R_RFCON2,  0x80);
+	mrf24j40_wr_long(MRF24J40_R_RFCON6,  0x90);
+	mrf24j40_wr_long(MRF24J40_R_RFCON8,  0x10);
+
+	/* device configuration */
+	mrf24j40_cca(MRF24J40_CCA_MODE3);
+	mrf24j40_rssi_fiforeq();
+	mrf24j40_config_ifs();
+
+	/* enable interrupts */
+	mrf24j40_wr_short(MRF24J40_R_INTCON, 0x00); // 0x00: all
+
+	/* set RFOPT = 0x03 */
+	mrf24j40_wr_long(MRF24J40_R_RFCON0,  0x03);
+
+	/* set transmitter power */
+	mrf24j40_wr_long(MRF24J40_R_RFCON3,  0x00); // 0x00: highest / 0xF8: very poor
+
+	/* set the rx mode */
+	mrf24j40_config_rxmode(MRF24J40_RXMODE_NORMAL);
+	mrf24j40_config_rxfilter(MRF24J40_RXFILTER_ALL);
+
+	/* reset RF state machine */
+	mrf24j40_swrst(0, 1);
+}
+
+void mrf24j40_cca(uint8_t mode)
+{
+	/* obtain current register state */
+	uint8_t reg = mrf24j40_rd_long(MRF24J40_R_BBREG2);
+
+	MRF24J40_SET_CCAMODE(reg, mode);
+	mrf24j40_wr_long(MRF24J40_R_BBREG2, reg);
+
+	if (mode & MRF24J40_CCA_MODE2)
+	{
+		/* no need to load register value anew */
+		MRF24J40_SET_CCACSTH(reg, 0x0E); // recommended value
+		mrf24j40_wr_long(MRF24J40_R_BBREG2, reg);
+	}
+
+	if (mode & MRF24J40_CCA_MODE1)
+	{
+		reg = mrf24j40_rd_short(MRF24J40_R_CCAEDTH);
+		MRF24J40_SET_CCAEDTH(reg, 0x60); // recommended value (approx. -69 dBm)
+		mrf24j40_wr_short(MRF24J40_R_CCAEDTH, reg);
+	}
+}
+
+uint8_t mrf24j40_rssi_firmwreq(uint32_t len)
+{
+	uint8_t rssi = 0, reg;
+	uint8_t restore = mrf24j40_rd_short(MRF24J40_R_BBREG6);
+	uint32_t i;
+
+	/* check if RSSI mode 2 is enabled */
+	restore = MRF24J40_GET_RSSIMODE2(restore);
+
+	for (i = 0; i < len; i++)
+	{
+		/* initiate RSSI calculation */
+		mrf24j40_wr_short(MRF24J40_R_BBREG6, 0x80);
+
+		/* wait until RSSI calculation is complete */
+		while (mrf24j40_rd_short(MRF24J40_R_BBREG6) != 1);
+
+		reg = mrf24j40_rd_long(MRF24J40_R_RSSI);
+
+		if (reg > rssi) {
+			rssi = reg;
+		}
+	}
+
+	/* if necessary: restore RSSI mode 2 */
+	if (restore) {
+		mrf24j40_wr_short(MRF24J40_R_BBREG6, 0x40);
+	}
+
+	return rssi;
+}
+
+void mrf24j40_rssi_fiforeq(void)
+{
+	uint8_t reg = mrf24j40_rd_short(MRF24J40_R_BBREG6);
+
+	MRF24J40_SET_RSSIMODE2(reg, 1);
+	mrf24j40_wr_short(MRF24J40_R_BBREG6, reg);
+}
+
+void mrf24j40_config_ifs(void)
+{
+	uint8_t reg;
+
+	/* aMinSIFSPeriod = MSIFS + RFSTBL */
+	reg = mrf24j40_rd_short(MRF24J40_R_TXSTBL);
+	MRF24J40_SET_MSIFS(reg, 0x05); // datasheet default: 16 us
+	MRF24J40_SET_RFSTBL(reg, 0x09); // datasheet recommendation
+	mrf24j40_wr_short(MRF24J40_R_TXSTBL, reg);
+
+	/* aMinLIFSPeriod = MLFS + RFSTBL */
+	reg = mrf24j40_rd_short(MRF24J40_R_TXPEND);
+	MRF24J40_SET_MLIFS(reg, 0x1F); // datasheet recommendation
+	mrf24j40_wr_short(MRF24J40_R_TXPEND, reg);
+
+	/* aTurnaroundTime = TURNTIME + RFSTBL */
+	reg = mrf24j40_rd_short(MRF24J40_R_TXTIME);
+	MRF24J40_SET_TURNTIME(reg, 0x03); // datasheet recommendation
+	mrf24j40_wr_short(MRF24J40_R_TXTIME, reg);
+}
+
+void mrf24j40_config_rxmode(uint8_t mode)
+{
+	uint8_t reg = mrf24j40_rd_short(MRF24J40_R_RXMCR);
+
+	switch (mode)
+	{
+		case MRF24J40_RXMODE_NORMAL:
+			MRF24J40_SET_ERRPKT(reg, 0);
+			MRF24J40_SET_PROMI(reg, 0);
+			break;
+
+		case MRF24J40_RXMODE_ERROR:
+			MRF24J40_SET_ERRPKT(reg, 1);
+			MRF24J40_SET_PROMI(reg, 0);
+			break;
+
+		case MRF24J40_RXMODE_PROMISCUOUS:
+			MRF24J40_SET_ERRPKT(reg, 0);
+			MRF24J40_SET_PROMI(reg, 1);
+			break;
+
+		default:
+			/* something has gone wrong here */
+			return;
+	}
+
+	mrf24j40_wr_short(MRF24J40_R_RXMCR, reg);
+}
+
+void mrf24j40_config_rxfilter(uint8_t filter)
+{
+	uint8_t reg = mrf24j40_rd_short(MRF24J40_R_RXFLUSH);
+
+	switch (filter)
+	{
+		case MRF24J40_RXFILTER_ALL:
+			MRF24J40_SET_CMDONLY(reg, 1);
+			MRF24J40_SET_DATAONLY(reg, 1);
+			MRF24J40_SET_BCNONLY(reg, 1);
+			break;
+
+		case MRF24J40_RXFILTER_CMD:
+			MRF24J40_SET_CMDONLY(reg, 1);
+			MRF24J40_SET_DATAONLY(reg, 0);
+			MRF24J40_SET_BCNONLY(reg, 0);
+			break;
+
+		case MRF24J40_RXFILTER_DATA:
+			MRF24J40_SET_CMDONLY(reg, 0);
+			MRF24J40_SET_DATAONLY(reg, 1);
+			MRF24J40_SET_BCNONLY(reg, 0);
+			break;
+
+		case MRF24J40_RXFILTER_BEACON:
+			MRF24J40_SET_CMDONLY(reg, 0);
+			MRF24J40_SET_DATAONLY(reg, 0);
+			MRF24J40_SET_BCNONLY(reg, 1);
+			break;
+
+		default:
+			/* something has gone wrong here */
+			return;
+	}
+
+	mrf24j40_wr_short(MRF24J40_R_RXFLUSH, reg);
+}
