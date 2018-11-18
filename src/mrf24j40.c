@@ -22,6 +22,12 @@
 
 #include "mrf24j40.h"
 
+/* ATTENTION These registers need to be allocated by the user! */
+extern uint8_t mrf24j40_rxfifo[144];
+extern uint8_t mrf24j40_txfifo[128];
+extern uint8_t aes_key[16];
+extern uint8_t aes_nonce[13];
+
 void mrf24j40_hwrst(void)
 {
 	mrf24j40_pin_ctrl(MRF24J40_RST_PIN, 0x00);
@@ -302,5 +308,73 @@ void mrf24j40_set_channel(uint8_t ch)
 
 void mrf24j40_set_txpower(uint8_t txpwr)
 {
-	mrf24j40_wr_long(MRF24J40_R_RFCON3, (sc << txpwr));
+	mrf24j40_wr_long(MRF24J40_R_RFCON3, (txpwr << 3));
+}
+
+uint8_t mrf24j40_rd_rxfifo(void)
+{
+	uint8_t len, reg = 0;
+
+	/* disable receiving packets off air */
+	MRF24J40_SET_RXDECINV(reg, 1);
+	mrf24j40_wr_short(MRF24J40_R_BBREG1, reg);
+
+	/* get RXFIFO frame length */
+	len = mrf24j40_rd_long(MRF24J40_RX_FIFO);
+
+	if (len > MRF24J40_RX_FIFO_LEN) {
+		len = MRF24J40_RX_FIFO_LEN;
+	}
+
+	/* read FIFO in burst mode */
+	mrf24j40_rd_fifo(MRF24J40_RX_FIFO + 1, mrf24j40_rxfifo, len + 4); // + 4: fcs(2) + lqi + rssi
+
+	/* enable receiving packets */
+	mrf24j40_wr_short(MRF24J40_R_BBREG1, 0);
+
+	return len;
+}
+
+void mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t buf_len)
+{
+	uint8_t reg;
+
+	/* header and frame length */
+	mrf24j40_wr_long(fifo, hdr_len);
+	mrf24j40_wr_long(fifo + 1, buf_len);
+
+	/* write fifo in burst mode */
+	mrf24j40_wr_fifo(fifo + 2, buf, buf_len);
+
+	/* trigger the packet tranmsission */
+	switch (fifo) {
+		case MRF24J40_TXNFIFO:
+			reg = mrf24j40_rd_short(MRF24J40_R_TXNCON);
+			MRF24J40_SET_TXNTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXNCON, reg);
+			break;
+
+		case MRF24J40_TXBFIFO:
+			/* NOTE only single shot, TXBFIFO will be flushed? */
+			reg = mrf24j40_rd_short(MRF24J40_R_TXBCON0);
+			MRF24J40_SET_TXBTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXBCON0, reg);
+			break;
+
+		case MRF24J40_TXG1FIFO:
+			reg = mrf24j40_rd_short(MRF24J40_R_TXG1CON);
+			MRF24J40_SET_TXGTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXG1CON, reg);
+			break;
+
+		case MRF24J40_TXG2FIFO:
+			reg = mrf24j40_rd_short(MRF24J40_R_TXG2CON);
+			MRF24J40_SET_TXGTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXG2CON, reg);
+			break;
+
+		default:
+			/* something has gone wrong here */
+			return;
+	}
 }
