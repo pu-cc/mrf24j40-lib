@@ -72,6 +72,7 @@ extern void    mrf24j40_delay_us(const double us);
 void    mrf24j40_hwrst(void);
 void    mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst);
 
+uint8_t mrf24j40_isr_handler(void);
 void    mrf24j40_init(void);
 void    mrf24j40_cca(uint8_t mode);
 uint8_t mrf24j40_rssi_firmwreq(uint32_t len);
@@ -79,5 +80,9 @@ void    mrf24j40_rssi_fiforeq(void);
 void    mrf24j40_config_ifs(void);
 void    mrf24j40_config_rxmode(uint8_t mode);
 void    mrf24j40_config_rxfilter(uint8_t mode);
+
+void mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id);
+void mrf24j40_set_channel(uint8_t ch);
+void mrf24j40_set_txpower(uint8_t txpwr);
 
 #endif //_MRF24J40_H

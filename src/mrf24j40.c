@@ -53,6 +53,33 @@ void mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst)
 	}
 }
 
+uint8_t mrf24j40_isr_handler(void)
+{
+	uint8_t reg;
+	uint8_t irqmsk = mrf24j40_rd_short(MRF24J40_R_INTSTAT);
+
+	if (irqmsk & MRF24J40_IRQ_SLPIF)
+	{
+	}
+	if (irqmsk & MRF24J40_IRQ_WAKEIF)
+	{
+	}
+	if (irqmsk & MRF24J40_IRQ_HSYMTMRIF)
+	{
+	}
+	if (irqmsk & MRF24J40_IRQ_SECIF)
+	{
+	}
+	if (irqmsk & MRF24J40_IRQ_RXIF)
+	{
+	}
+	if (irqmsk & (MRF24J40_IRQ_TXG1IF | MRF24J40_IRQ_TXG2IF | MRF24J40_IRQ_TXNIF))
+	{
+	}
+
+	return irqmsk;
+}
+
 void mrf24j40_init(void)
 {
 	/* perform hard- and software reset */
@@ -238,4 +265,42 @@ void mrf24j40_config_rxfilter(uint8_t filter)
 	}
 
 	mrf24j40_wr_short(MRF24J40_R_RXFLUSH, reg);
+}
+
+void mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id)
+{
+	/* program the associated coordinator's 64-bit extended address */
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR0, e_addr[0]); /* 0..7 */
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR1, e_addr[1]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR2, e_addr[2]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR3, e_addr[3]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR4, e_addr[4]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR5, e_addr[5]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR6, e_addr[6]);
+	mrf24j40_wr_long(MRF24J40_R_ASSOEADR7, e_addr[7]);
+
+	/* program the associated coordinator's 16-bit short address */
+	mrf24j40_wr_long(MRF24J40_R_ASSOSADR0, s_addr[0]); /* 0..7 */
+	mrf24j40_wr_long(MRF24J40_R_ASSOSADR1, s_addr[1]);
+
+	/* program source pan id */
+	mrf24j40_wr_short(MRF24J40_R_PANIDL, pan_id[0]); /* 0..7 */
+	mrf24j40_wr_short(MRF24J40_R_PANIDH, pan_id[1]);
+}
+
+void mrf24j40_set_channel(uint8_t ch)
+{
+	uint8_t reg;
+
+	reg = mrf24j40_rd_long(MRF24J40_R_RFCON0);
+	MRF24J40_SET_CHANNEL(reg, ch);
+	mrf24j40_wr_long(MRF24J40_R_RFCON0, reg);
+
+	/* reset the RF state machine */
+	mrf24j40_swrst(0, 1);
+}
+
+void mrf24j40_set_txpower(uint8_t txpwr)
+{
+	mrf24j40_wr_long(MRF24J40_R_RFCON3, (sc << txpwr));
 }
