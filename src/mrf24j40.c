@@ -66,21 +66,39 @@ uint8_t mrf24j40_isr_handler(void)
 
 	if (irqmsk & MRF24J40_IRQ_SLPIF)
 	{
+		/* acknowledge SLPIF: enable low current sleep mode */
+		reg = mrf24j40_rd_short(MRF24J40_R_SLPACK);
+		MRF24J40_SET_SLPACK(reg, 1);
+		mrf24j40_wr_short(MRF24J40_R_SLPACK, reg);
 	}
 	if (irqmsk & MRF24J40_IRQ_WAKEIF)
 	{
+		/* NOTE This is an alert to the host MCU: */
+		/* May be useful if the MCU is in a low current (sleep) mode */
 	}
 	if (irqmsk & MRF24J40_IRQ_HSYMTMRIF)
 	{
+		/* TODO implement timer */
 	}
 	if (irqmsk & MRF24J40_IRQ_SECIF)
 	{
+		/* TODO implement security suite */
 	}
 	if (irqmsk & MRF24J40_IRQ_RXIF)
 	{
+		mrf24j40_rd_rxfifo();
 	}
 	if (irqmsk & (MRF24J40_IRQ_TXG1IF | MRF24J40_IRQ_TXG2IF | MRF24J40_IRQ_TXNIF))
 	{
+		mrf24j40_rd_short(MRF24J40_R_TXSTAT);
+
+		/* check if MIC error has occurred */
+		reg = mrf24j40_rd_short(MRF24J40_R_RXSR);
+		if (MRF24J40_GET_UPSECERR(reg))
+		{
+			/* write '1' to clear */
+			mrf24j40_wr_short(MRF24J40_R_RXFLUSH, reg);
+		}
 	}
 
 	return irqmsk;
