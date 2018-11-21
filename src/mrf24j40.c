@@ -329,6 +329,48 @@ void mrf24j40_set_txpower(uint8_t txpwr)
 	mrf24j40_wr_long(MRF24J40_R_RFCON3, (txpwr << 3));
 }
 
+void mrf24j40_config_timed_sleep(uint8_t ext_clk)
+{
+	uint8_t reg;
+
+	/* enable sleep clock generation */
+	reg = mrf24j40_rd_long(MRF24J40_R_SLPCON0);
+	MRF24J40_SET_SLPCLKEN(reg, 0); // 0: enabled
+	mrf24j40_wr_long(MRF24J40_R_SLPCON0, reg);
+
+	/* frequency can be further divided */
+	reg = mrf24j40_rd_long(MRF24J40_R_SLPCON1);
+	MRF24J40_SET_CLKOUTEN(reg, 0); // 0: enable CLKOUT pin 26 (discontinued)
+	MRF24J40_SET_SLPCLKDIV(reg, (ext_clk ? 0x00 : 0x01));
+	mrf24j40_wr_long(MRF24J40_R_SLPCON1, reg);
+
+	/* select clock source */
+	reg = mrf24j40_rd_long(MRF24J40_R_RFCON7);
+	MRF24J40_SET_SLPCLKSEL(reg, (ext_clk ? 0x01 : 0x02));
+	mrf24j40_wr_long(MRF24J40_R_RFCON7, reg);
+
+	/* sleep clock calibration */
+	reg = mrf24j40_rd_long(MRF24J40_R_SLPCAL2);
+	MRF24J40_SET_SLPCALEN(reg, 1);
+	mrf24j40_wr_long(MRF24J40_R_SLPCAL2, reg);
+
+	do {
+		reg = mrf24j40_rd_long(MRF24J40_R_SLPCAL2);
+	} while (reg != 0x80);
+
+	/* program sleep mode counters */
+	reg = mrf24j40_rd_short(MRF24J40_R_SLPACK);
+	MRF24J40_SET_WAKECNTL(reg, (ext_clk ? 0x42 : 0xC8));
+	mrf24j40_wr_short(MRF24J40_R_SLPACK, reg);
+
+	reg = mrf24j40_rd_short(MRF24J40_R_RFCTL);
+	MRF24J40_SET_WAKECNTH(reg, 0);
+	mrf24j40_wr_short(MRF24J40_R_RFCTL, reg);
+
+	mrf24j40_wr_long(MRF24J40_R_WAKETIMEL, (ext_clk ? 0x45 : 0xD2));
+	mrf24j40_wr_long(MRF24J40_R_WAKETIMEH, 0);
+}
+
 uint8_t mrf24j40_rd_rxfifo(void)
 {
 	uint8_t len, reg = 0;
