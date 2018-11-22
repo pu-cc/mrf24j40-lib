@@ -25,8 +25,8 @@
 /* ATTENTION These registers need to be allocated by the user! */
 extern uint8_t mrf24j40_rxfifo[144];
 extern uint8_t mrf24j40_txfifo[128];
-extern uint8_t aes_key[16];
-extern uint8_t aes_nonce[13];
+//extern uint8_t aes_key[16];
+//extern uint8_t aes_nonce[13];
 
 void mrf24j40_hwrst(void)
 {
@@ -437,4 +437,18 @@ void mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t bu
 			/* something has gone wrong here */
 			return;
 	}
+}
+
+void mrf24j40_config_mac_timer(uint16_t ticks)
+{
+	uint8_t reg;
+
+	/* timer starts when a value is written to HSYMTMRH */
+	mrf24j40_wr_short(MRF24J40_R_HSYMTMRL, ticks);
+	mrf24j40_wr_short(MRF24J40_R_HSYMTMRH, ticks >> 8);
+
+	/* unmask (enable) / mask (disable) HSYMTMRIF flag: */
+	reg = mrf24j40_rd_short(MRF24J40_R_INTCON);
+	MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
+	mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
 }

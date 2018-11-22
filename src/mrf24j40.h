@@ -81,11 +81,15 @@ void    mrf24j40_config_ifs(void);
 void    mrf24j40_config_rxmode(uint8_t mode);
 void    mrf24j40_config_rxfilter(uint8_t mode);
 
-void mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id);
-void mrf24j40_set_channel(uint8_t ch);
-void mrf24j40_set_txpower(uint8_t txpwr);
+void    mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id);
+void    mrf24j40_set_channel(uint8_t ch);
+void    mrf24j40_set_txpower(uint8_t txpwr);
+
+void    mrf24j40_config_timed_sleep(uint8_t ext_clk);
 
 uint8_t mrf24j40_rd_rxfifo(void);
-void mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t buf_len);
+void    mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t buf_len);
+
+void    mrf24j40_config_mac_timer(uint16_t ticks);
 
 #endif //_MRF24J40_H
