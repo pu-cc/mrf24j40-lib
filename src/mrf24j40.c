@@ -140,6 +140,86 @@ void mrf24j40_init(void)
 	mrf24j40_swrst(0, 1);
 }
 
+void mrf24j40_config(uint8_t pan_coord, uint8_t bo, uint8_t so, uint8_t hdr_len, uint8_t buf_len)
+{
+	uint8_t reg, beacon;
+
+	/* check for beacon-enabled mode */
+	beacon = ((bo < 15) && (so < 15)) ? 1 : 0;
+
+	/* configure as PAN coordinator or peer device */
+	reg = mrf24j40_rd_short(MRF24J40_R_RXMCR);
+	MRF24J40_SET_PANCOORD(reg, (pan_coord ? 1 : 0));
+	//MRF24J40_SET_COORD(reg, (ffd_coord ? 1 : 0)); // to be implemented
+	mrf24j40_wr_short(MRF24J40_R_RXMCR, reg);
+
+	/* config (un-)slotted CSMA-CA mode */
+	mrf24j40_config_csmaca((beacon ? 1 : 0));
+
+	if (beacon)
+	{
+		if (pan_coord)
+		{
+			/* load beacon frame into the TXBFIFO */
+			mrf24j40_wr_txfifo(MRF24J40_TXBFIFO, mrf24j40_txfifo, hdr_len, buf_len);
+
+			/* mask beacon interrupt */
+			reg = mrf24j40_rd_short(MRF24J40_R_TXBCON1);
+			MRF24J40_SET_TXBMSK(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXBCON1, reg);
+
+			/* timing interval between triggering slotted mode and first time to
+			 * transmit beacon
+			 */
+			reg = mrf24j40_rd_short(MRF24J40_R_WAKECON);
+			MRF24J40_SET_INTL(reg, 0x03);
+			mrf24j40_wr_short(MRF24J40_R_WAKECON, reg);
+		}
+		else
+		{
+			/* set frame offset */
+			mrf24j40_wr_short(MRF24J40_R_FRMOFFSET, 0x15); // optimum timing alignment
+		}
+
+		/* calibrate sleep clock frequency */
+		mrf24j40_config_timed_sleep(0);
+
+		slpcal  = (uint32_t)mrf24j40_rd_long(MRF24J40_R_SLPCAL0);
+		slpcal |= (uint32_t)mrf24j40_rd_long(MRF24J40_R_SLPCAL1) << 8;
+		slpcal |= (uint32_t)MRF24J40_GET_SLPCAL2(mrf24j40_rd_long(MRF24J40_R_SLPCAL2)) << 16;
+
+		/* calculate the sleep period. -> PSLPCAL = SLPCAL * 50 ns / 16 = SLPCAL * 0.05 us / 16 */
+		pslpcal = slpcal / 320;
+
+		/* program beacon interval according to BO (& SO) value */
+		if (pan_coord) {
+			bi = 960 * 16 * pow(2, bo) / pslpcal;
+		}
+		else {
+			bi = 960 * 16 * ((uint32_t)pow(2, bo) - (uint32_t)pow(2, so)) / pslpcal;
+		}
+
+		/* 1. main counter */
+		// TODO: maincnt clock period is SLPCLK !!!!
+		mrf24j40_wr_long(MRF24J40_R_MAINCNT0, bi);
+		mrf24j40_wr_long(MRF24J40_R_MAINCNT1, bi >> 8);
+		mrf24j40_wr_long(MRF24J40_R_MAINCNT2, bi >> 16);
+		mrf24j40_wr_long(MRF24J40_R_MAINCNT3, bi >> 24);
+
+		// 2. remain counter
+		mrf24j40_wr_long(MRF24J40_R_REMCNTL, 0xff); // TEST
+		mrf24j40_wr_long(MRF24J40_R_REMCNTH, 0xff); // TEST
+
+		// TODO config GTS
+	}
+
+	/* configure BO and SO values (0 <= SO <= BO <= 14) */
+	reg = mrf24j40_rd_short(MRF24J40_R_ORDER);
+	MRF24J40_SET_BO(reg, (beacon ? bo : 0x0F)); // BO=15: ignore superframe
+	MRF24J40_SET_SO(reg, (beacon ? so : 0x0F)); // SO=15: no active period after beacon
+	mrf24j40_wr_short(MRF24J40_R_ORDER, reg);
+}
+
 void mrf24j40_cca(uint8_t mode)
 {
 	/* obtain current register state */
