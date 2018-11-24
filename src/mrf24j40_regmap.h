@@ -45,6 +45,18 @@
 #define MRF24J40_KEY_LEN			0x0F  // 128 Bits
 
 /*
+ * IRQ Masks
+ */
+#define MRF24J40_IRQ_SLPIF			0x80
+#define MRF24J40_IRQ_WAKEIF			0x40
+#define MRF24J40_IRQ_HSYMTMRIF			0x20
+#define MRF24J40_IRQ_SECIF			0x10
+#define MRF24J40_IRQ_RXIF			0x08
+#define MRF24J40_IRQ_TXG1IF			0x04
+#define MRF24J40_IRQ_TXG2IF			0x02
+#define MRF24J40_IRQ_TXNIF			0x01
+
+/*
  * 2-1: Receive MAC Control Register
  */
 #define MRF24J40_R_RXMCR			0x00

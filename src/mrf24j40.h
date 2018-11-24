@@ -24,6 +24,8 @@
 #define _MRF24J40_H
 
 #include "mrf24j40_regmap.h"
+#include <stdint.h>
+#include <math.h>
 
 /* SPI r/w Interface Access */
 #define MRF24J40_SPI_RD_SHORT(R)	(R = ((R & 0x3F) << 1))
@@ -74,9 +76,12 @@ void    mrf24j40_swrst(uint8_t sw_rstmsk, uint8_t rfrst);
 
 uint8_t mrf24j40_isr_handler(void);
 void    mrf24j40_init(void);
+void    mrf24j40_config(uint8_t pan_coord, uint8_t bo, uint8_t so, uint8_t hdr_len, uint8_t buf_len);
+
 void    mrf24j40_cca(uint8_t mode);
 uint8_t mrf24j40_rssi_firmwreq(uint32_t len);
 void    mrf24j40_rssi_fiforeq(void);
+void    mrf24j40_config_csmaca(uint8_t slotted);
 void    mrf24j40_config_ifs(void);
 void    mrf24j40_config_rxmode(uint8_t mode);
 void    mrf24j40_config_rxfilter(uint8_t mode);

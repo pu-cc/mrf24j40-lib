@@ -143,6 +143,7 @@ void mrf24j40_init(void)
 void mrf24j40_config(uint8_t pan_coord, uint8_t bo, uint8_t so, uint8_t hdr_len, uint8_t buf_len)
 {
 	uint8_t reg, beacon;
+	uint32_t slpcal, pslpcal, bi;
 
 	/* check for beacon-enabled mode */
 	beacon = ((bo < 15) && (so < 15)) ? 1 : 0;
@@ -281,6 +282,27 @@ void mrf24j40_rssi_fiforeq(void)
 
 	MRF24J40_SET_RSSIMODE2(reg, 1);
 	mrf24j40_wr_short(MRF24J40_R_BBREG6, reg);
+}
+
+void mrf24j40_config_csmaca(uint8_t slotted)
+{
+	uint8_t reg;
+
+	/* set slotted / unslotted mode */
+	reg = mrf24j40_rd_short(MRF24J40_R_TXMCR);
+	MRF24J40_SET_SLOTTED(reg, (slotted ? 1 : 0));
+
+	if (slotted) {
+		/* NOTE currently disabled due to tx problems */
+		//MRF24J40_SET_BATLIFEXT(reg, 1);
+	}
+
+	/* set macMinBE and macMaxCSMABackoff (IEEE defaults) */
+	MRF24J40_SET_MACMINBE(reg, 3);
+	MRF24J40_SET_CSMABF(reg, 4);
+
+	/* write register values to the chip */
+	mrf24j40_wr_short(MRF24J40_R_TXMCR, reg);
 }
 
 void mrf24j40_config_ifs(void)
