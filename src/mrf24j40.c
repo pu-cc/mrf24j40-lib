@@ -396,22 +396,13 @@ void mrf24j40_config_rxfilter(uint8_t filter)
 void mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id)
 {
 	/* program the associated coordinator's 64-bit extended address */
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR0, e_addr[0]); /* 0..7 */
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR1, e_addr[1]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR2, e_addr[2]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR3, e_addr[3]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR4, e_addr[4]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR5, e_addr[5]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR6, e_addr[6]);
-	mrf24j40_wr_long(MRF24J40_R_ASSOEADR7, e_addr[7]);
+	mrf24j40_wr_fifo(MRF24J40_R_ASSOEADR0, e_addr, 8);
 
 	/* program the associated coordinator's 16-bit short address */
-	mrf24j40_wr_long(MRF24J40_R_ASSOSADR0, s_addr[0]); /* 0..7 */
-	mrf24j40_wr_long(MRF24J40_R_ASSOSADR1, s_addr[1]);
+	mrf24j40_wr_fifo(MRF24J40_R_ASSOSADR0, s_addr, 2);
 
 	/* program source pan id */
-	mrf24j40_wr_short(MRF24J40_R_PANIDL, pan_id[0]); /* 0..7 */
-	mrf24j40_wr_short(MRF24J40_R_PANIDH, pan_id[1]);
+	mrf24j40_wr_fifo(MRF24J40_R_PANIDL, pan_id, 2);
 }
 
 void mrf24j40_set_channel(uint8_t ch)
