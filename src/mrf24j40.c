@@ -545,3 +545,26 @@ void mrf24j40_config_mac_timer(uint16_t ticks)
 	MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
 	mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
 }
+
+void mrf24j40_config_batmon(uint8_t threshold)
+{
+	uint8_t reg;
+
+	/* set the battery monitor threshold */
+	reg = mrf24j40_rd_long(MRF24J40_R_RFCON5);
+	MRF24J40_SET_BATTH(reg, threshold);
+	mrf24j40_wr_long(MRF24J40_R_RFCON5, reg);
+
+	/* enable battery monitoring */
+	reg = mrf24j40_rd_long(MRF24J40_R_RFCON6);
+	MRF24J40_SET_BATEN(reg, (threshold > MRF24J40_BATTH_UNDEF));
+	mrf24j40_wr_long(MRF24J40_R_RFCON6, reg);
+}
+
+uint8_t mrf24j40_battery_status(void)
+{
+	/* obtain current register state */
+	uint8_t reg = mrf24j40_rd_short(MRF24J40_R_RXSR);
+
+	return MRF24J40_GET_BATIND(reg); // 1: lower than threshold
+}

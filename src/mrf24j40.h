@@ -55,6 +55,17 @@
 #define MRF24J40_RXFILTER_DATA		0x02
 #define MRF24J40_RXFILTER_BEACON	0x01
 
+/* Battery low-voltage threshold masks */
+#define MRF24J40_BATTH_3V5		0x0E
+#define MRF24J40_BATTH_3V3		0x0D
+#define MRF24J40_BATTH_3V2		0x0C
+#define MRF24J40_BATTH_3V1		0x0B
+#define MRF24J40_BATTH_2V8		0x0A
+#define MRF24J40_BATTH_2V7		0x09
+#define MRF24J40_BATTH_2V6		0x08
+#define MRF24J40_BATTH_2V5		0x07
+#define MRF24J40_BATTH_UNDEF		0x06
+
 /*
  * ATTENTION These functions need to be implemented by the user!
  */
@@ -96,5 +107,8 @@ uint8_t mrf24j40_rd_rxfifo(void);
 void    mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t buf_len);
 
 void    mrf24j40_config_mac_timer(uint16_t ticks);
+
+void    mrf24j40_config_batmon(uint8_t threshold);
+uint8_t mrf24j40_battery_status(void);
 
 #endif //_MRF24J40_H
