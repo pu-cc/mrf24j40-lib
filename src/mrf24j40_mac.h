@@ -44,4 +44,70 @@
 #define MAC_RESPONSE_WAIT_TIME		(32 * MAC_BASE_SUPERFRAME_DURATION)
 #define MAC_UNIT_BACKOFF_PERIOD		20
 
+typedef enum {
+	MAC_ENUM_SUCCESS = 0,
+	/* 0x01 - 0xDF: reserved */
+	/* 0x80 - 0xDF: reserved */
+	MAC_ENUM_BEACON_LOSS = 0xE0,
+	MAC_ENUM_CHANNEL_ACCESS_FAILURE,
+	MAC_ENUM_DENIED,
+	MAC_ENUM_DISABLE_TRX_FAILURE,
+	MAC_ENUM_FAILED_SECURITY_CHECK,
+	MAC_ENUM_FRAME_TOO_LONG,
+	MAC_ENUM_INVALID_GTS,
+	MAC_ENUM_INVALID_HANDLE,
+	MAC_ENUM_INVALID_PARAMETER,
+	MAC_ENUM_NO_ACK,
+	MAC_ENUM_NO_BEACON,
+	MAC_ENUM_NO_DATA,
+	MAC_ENUM_NO_SHORT_ADDRESS,
+	MAC_ENUM_OUT_OF_CAP,
+	MAC_ENUM_PAN_ID_CONFLICT,
+	MAC_ENUM_REALIGNMENT,
+	MAC_ENUM_TRANSACTION_EXPIRED,
+	MAC_ENUM_TRANSACTION_OVERFLOW,
+	MAC_ENUM_TX_ACTIVE,
+	MAC_ENUM_UNAVAILABLE_KEY,
+	MAC_ENUM_UNSUPPORTED_ATTRIBUTE
+} mac_enum_e;
+
+/*
+ * MAC PIB (PAN information base)
+ */
+struct mac_pib_t {
+	uint8_t mac_ack_wait_duration;
+	uint8_t mac_assoc_permit;
+	uint8_t mac_auto_request;
+	uint8_t mac_bat_life_ext;
+	uint8_t mac_bat_life_ext_periods;
+	uint8_t *mac_beacon_payload;
+	uint8_t mac_beacon_len;
+	uint8_t mac_bo;
+	uint8_t mac_beacon_tx_time;
+	uint8_t mac_bsn;
+	uint8_t *mac_coord_e_addr;
+	uint8_t *mac_coord_s_addr;
+	uint8_t mac_dsn;
+	uint8_t mac_gts_permit;
+	uint8_t mac_max_csma_backoffs;
+	uint8_t mac_min_be;
+	uint8_t *mac_pan_id;
+	uint8_t mac_promiscuous_mode;
+	uint8_t mac_rx_on_when_idle;
+	uint8_t *mac_s_addr;
+	uint8_t mac_so;
+	uint16_t mac_transact_persist_time;
+
+	/* ACL */
+	acldesc_t mac_acl_entry_descr;
+	uint8_t mac_acl_entry_descr_size;
+
+	/* securtiy suite */
+	uint8_t mac_default_security;
+	uint8_t mac_default_security_mat_len;
+	uint8_t *mac_default_security_mat;
+	uint8_t mac_default_security_suite;
+	uint8_t mac_security_mode;
+} mac_pib;
+
 #endif //_MRF24J40_MAC_H
