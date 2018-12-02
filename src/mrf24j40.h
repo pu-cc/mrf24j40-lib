@@ -55,6 +55,12 @@
 #define MRF24J40_RXFILTER_DATA		0x02
 #define MRF24J40_RXFILTER_BEACON	0x01
 
+/* TRX states */
+#define MRF24J40_TX_ON			0x01
+#define MRF24J40_RX_ON			0x02
+#define MRF24J40_TRX_OFF		0x03
+#define MRF24J40_FORCE_TRX_OFF		0x04
+
 /* Battery low-voltage threshold masks */
 #define MRF24J40_BATTH_3V5		0x0E
 #define MRF24J40_BATTH_3V3		0x0D
@@ -100,6 +106,7 @@ void    mrf24j40_config_rxfilter(uint8_t mode);
 void    mrf24j40_set_addr(uint8_t *e_addr, uint8_t *s_addr, uint8_t *pan_id);
 void    mrf24j40_set_channel(uint8_t ch);
 void    mrf24j40_set_txpower(uint8_t txpwr);
+void    mrf24j40_set_trxstate(uint8_t state);
 
 void    mrf24j40_config_timed_sleep(uint8_t ext_clk);
 

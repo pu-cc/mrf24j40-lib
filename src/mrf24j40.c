@@ -130,7 +130,7 @@ void mrf24j40_init(void)
 	mrf24j40_wr_long(MRF24J40_R_RFCON0,  0x03);
 
 	/* set transmitter power */
-	mrf24j40_wr_long(MRF24J40_R_RFCON3,  0x00); // 0x00: highest / 0xF8: very poor
+	mrf24j40_set_txpower(0); // 0: highest / 31: very poor
 
 	/* set the rx mode */
 	mrf24j40_config_rxmode(MRF24J40_RXMODE_NORMAL);
@@ -419,7 +419,29 @@ void mrf24j40_set_channel(uint8_t ch)
 
 void mrf24j40_set_txpower(uint8_t txpwr)
 {
-	mrf24j40_wr_long(MRF24J40_R_RFCON3, (txpwr << 3));
+	if (txpwr < 32) {
+		mrf24j40_wr_long(MRF24J40_R_RFCON3, (txpwr << 3));
+	}
+}
+
+void mrf24j40_set_trxstate(uint8_t state)
+{
+	switch (state)
+	{
+		case MRF24J40_TX_ON:
+			/* nothing to do here */
+			break;
+		case MRF24J40_RX_ON:
+			/* enable receiving packets */
+			mrf24j40_wr_short(MRF24J40_R_BBREG1, 0);
+			break;
+		case MRF24J40_TRX_OFF:
+		case MRF24J40_FORCE_TRX_OFF:
+			/* disable receiving packets off air */
+			MRF24J40_SET_RXDECINV(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_BBREG1, reg);
+			break;
+	}
 }
 
 void mrf24j40_config_timed_sleep(uint8_t ext_clk)
