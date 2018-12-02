@@ -426,6 +426,8 @@ void mrf24j40_set_txpower(uint8_t txpwr)
 
 void mrf24j40_set_trxstate(uint8_t state)
 {
+	uint8_t reg = 0;
+
 	switch (state)
 	{
 		case MRF24J40_TX_ON:

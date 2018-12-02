@@ -72,9 +72,30 @@ typedef enum {
 } mac_enum_e;
 
 /*
+ * MLME-RESET.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+} mlme_reset_cnf_t;
+
+typedef void (* mlme_reset_cnf_cb_t)(mlme_reset_cnf_t *);
+
+mlme_reset_cnf_cb_t mlme_reset_cnf_cb(mlme_reset_cnf_t cnf);
+
+/*
+ * MLME-RESET.request
+ */
+typedef struct {
+	uint8_t set_default_pib;
+} mlme_reset_req_t;
+
+void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb);
+
+/*
  * MAC PIB (PAN information base)
  */
-struct mac_pib_t {
+struct mac_pib_d
+{
 	uint8_t mac_ack_wait_duration;
 	uint8_t mac_assoc_permit;
 	uint8_t mac_auto_request;
@@ -83,7 +104,7 @@ struct mac_pib_t {
 	uint8_t *mac_beacon_payload;
 	uint8_t mac_beacon_len;
 	uint8_t mac_bo;
-	uint8_t mac_beacon_tx_time;
+	uint32_t mac_beacon_tx_time;
 	uint8_t mac_bsn;
 	uint8_t *mac_coord_e_addr;
 	uint8_t *mac_coord_s_addr;
@@ -99,15 +120,15 @@ struct mac_pib_t {
 	uint16_t mac_transact_persist_time;
 
 	/* ACL */
-	acldesc_t mac_acl_entry_descr;
-	uint8_t mac_acl_entry_descr_size;
+	//acldesc_t mac_acl_entry_descr;
+	//uint8_t mac_acl_entry_descr_size;
 
 	/* securtiy suite */
-	uint8_t mac_default_security;
-	uint8_t mac_default_security_mat_len;
-	uint8_t *mac_default_security_mat;
-	uint8_t mac_default_security_suite;
-	uint8_t mac_security_mode;
+	//uint8_t mac_default_security;
+	//uint8_t mac_default_security_mat_len;
+	//uint8_t *mac_default_security_mat;
+	//uint8_t mac_default_security_suite;
+	//uint8_t mac_security_mode;
 } mac_pib;
 
 #endif //_MRF24J40_MAC_H
