@@ -44,10 +44,10 @@ void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb)
 		mac_pib.mac_beacon_len = 0;
 		mac_pib.mac_bo = 15;
 		mac_pib.mac_beacon_tx_time = 0;
-		mac_pib.mac_bsn = 0; // TODO random value
+		mac_pib.mac_bsn = mrf24j40_rnd();
 		mac_pib.mac_coord_e_addr = NULL;
 		mac_pib.mac_coord_s_addr = NULL;
-		mac_pib.mac_dsn = 0; // TODO random value
+		mac_pib.mac_dsn = mrf24j40_rnd();
 		mac_pib.mac_gts_permit = 1;
 		mac_pib.mac_max_csma_backoffs = 4;
 		mac_pib.mac_min_be = 3;

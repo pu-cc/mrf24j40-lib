@@ -84,6 +84,7 @@ extern void    mrf24j40_wr_fifo(uint16_t addr, uint8_t *data, uint8_t len);
 extern void    mrf24j40_pin_ctrl(uint8_t pin_mask, uint8_t pin_state);
 extern void    mrf24j40_delay_ms(const double ms);
 extern void    mrf24j40_delay_us(const double us);
+extern uint8_t mrf24j40_rnd(void);
 
 /*
  * Public functions
