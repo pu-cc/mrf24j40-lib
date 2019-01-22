@@ -28,6 +28,9 @@ extern uint8_t mrf24j40_txfifo[128];
 extern uint8_t aes_key[16];
 extern uint8_t aes_nonce[13];
 
+/* security engine */
+static uint8_t mrf24j40_security_suite = 0;
+
 void mrf24j40_hwrst(void)
 {
 	mrf24j40_pin_ctrl(MRF24J40_RST_PIN, 0x00);
@@ -593,10 +596,14 @@ void mrf24j40_config_mac_timer(uint16_t ticks)
 	mrf24j40_wr_short(MRF24J40_R_HSYMTMRL, ticks);
 	mrf24j40_wr_short(MRF24J40_R_HSYMTMRH, ticks >> 8);
 
-	/* unmask (enable) / mask (disable) HSYMTMRIF flag: */
+	/* unmask (enable) / mask (disable) HSYMTMRIF flag if necessary */
 	reg = mrf24j40_rd_short(MRF24J40_R_INTCON);
-	MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
-	mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
+
+	if (ticks ^ MRF24J40_GET_HSYMTMR(reg))
+	{
+		MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
+		mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
+	}
 }
 
 void mrf24j40_encrypt_mac(uint16_t fifo, uint8_t suite, uint8_t *key)
