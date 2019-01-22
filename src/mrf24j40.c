@@ -82,7 +82,16 @@ uint8_t mrf24j40_isr_handler(void)
 	}
 	if (irqmsk & MRF24J40_IRQ_SECIF)
 	{
-		/* TODO implement security suite */
+		mrf24j40_decrypt_mac(mrf24j40_security_suite, aes_key);
+
+		/* check if decryption error has occurred: discard packet */
+		reg = mrf24j40_rd_short(MRF24J40_R_RXSR);
+		if (MRF24J40_GET_SECDECERR(reg))
+		{
+			reg = mrf24j40_rd_short(MRF24J40_R_RXFLUSH);
+			MRF24J40_SET_RXFLUSH(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_RXFLUSH, reg);
+		}
 	}
 	if (irqmsk & MRF24J40_IRQ_RXIF)
 	{
@@ -588,6 +597,87 @@ void mrf24j40_config_mac_timer(uint16_t ticks)
 	reg = mrf24j40_rd_short(MRF24J40_R_INTCON);
 	MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
 	mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
+}
+
+void mrf24j40_encrypt_mac(uint16_t fifo, uint8_t suite, uint8_t *key)
+{
+	uint8_t reg;
+
+	switch (fifo)
+	{
+		case MRF24J40_TXNFIFO:
+			mrf24j40_wr_fifo(MRF24J40_KEY_TX_NORMAL, key, 0x0F);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_SECCON0);
+			MRF24J40_SET_TXNCIPHER(reg, suite);
+			mrf24j40_wr_short(MRF24J40_R_SECCON0, reg);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_TXNCON);
+			MRF24J40_SET_TXNSECEN(reg, 1);
+			MRF24J40_SET_TXNTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXNCON, reg);
+			break;
+
+		case MRF24J40_TXG1FIFO:
+			mrf24j40_wr_fifo(MRF24J40_KEY_TX_GTS1, key, 0x0F);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_SECCR2);
+			MRF24J40_SET_TXG1CIPHER(reg, suite);
+			mrf24j40_wr_short(MRF24J40_R_SECCR2, reg);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_TXG1CON);
+			MRF24J40_SET_TXGSECEN(reg, 1);
+			MRF24J40_SET_TXGTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXG1CON, reg);
+			break;
+
+		case MRF24J40_TXG2FIFO:
+			mrf24j40_wr_fifo(MRF24J40_KEY_TX_GTS2, key, 0x0F);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_SECCR2);
+			MRF24J40_SET_TXG2CIPHER(reg, suite);
+			mrf24j40_wr_short(MRF24J40_R_SECCR2, reg);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_TXG1CON);
+			MRF24J40_SET_TXGSECEN(reg, 1);
+			MRF24J40_SET_TXGTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXG1CON, reg);
+			break;
+
+		case MRF24J40_TXBFIFO:
+			mrf24j40_wr_fifo(MRF24J40_KEY_TX_BEACON, key, 0x0F);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_SECCON1);
+			MRF24J40_SET_TXBCIPHER(reg, suite);
+			mrf24j40_wr_short(MRF24J40_R_SECCON1, reg);
+
+			reg = mrf24j40_rd_short(MRF24J40_R_TXBCON0);
+			MRF24J40_SET_TXBSECEN(reg, 1);
+			MRF24J40_SET_TXBTRIG(reg, 1);
+			mrf24j40_wr_short(MRF24J40_R_TXBCON0, reg);
+			break;
+
+		default:
+			/* something has gone wrong here */
+			return;
+	}
+}
+
+void mrf24j40_decrypt_mac(uint8_t suite, uint8_t *key)
+{
+	uint8_t reg;
+
+	/* load the 128-bit security key */
+	mrf24j40_wr_fifo(MRF24J40_KEY_RX_FIFO, key, 0x0F);
+
+	/* select the security suite */
+	reg = mrf24j40_rd_short(MRF24J40_R_SECCON0);
+	MRF24J40_SET_RXCIPHER(reg, suite);
+	mrf24j40_wr_short(MRF24J40_R_SECCON0, reg);
+
+	/* trigger decryption */
+	MRF24J40_SET_SECSTART(reg, 1);
+	mrf24j40_wr_short(MRF24J40_R_SECCON0, reg);
 }
 
 void mrf24j40_config_batmon(uint8_t threshold)

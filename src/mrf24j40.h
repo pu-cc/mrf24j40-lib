@@ -28,49 +28,59 @@
 #include <math.h>
 
 /* SPI r/w Interface Access */
-#define MRF24J40_SPI_RD_SHORT(R)	(R = ((R & 0x3F) << 1))
-#define MRF24J40_SPI_WR_SHORT(R)	(R = ((R & 0x3F) << 1) | 0x01)
+#define MRF24J40_SPI_RD_SHORT(R)		(R = ((R & 0x3F) << 1))
+#define MRF24J40_SPI_WR_SHORT(R)		(R = ((R & 0x3F) << 1) | 0x01)
 
-#define MRF24J40_SPI_RD_LONG(R)		(R = ((R & 0x3FF) << 1) | 0x800)
-#define MRF24J40_SPI_WR_LONG(R)		(R = ((R & 0x3FF) << 1) | 0x801)
+#define MRF24J40_SPI_RD_LONG(R)			(R = ((R & 0x3FF) << 1) | 0x800)
+#define MRF24J40_SPI_WR_LONG(R)			(R = ((R & 0x3FF) << 1) | 0x801)
 
 /* Pin masks */
-#define MRF24J40_INT_PIN		0x01
-#define MRF24J40_WAK_PIN		0x02
-#define MRF24J40_RST_PIN		0x04
+#define MRF24J40_INT_PIN			0x01
+#define MRF24J40_WAK_PIN			0x02
+#define MRF24J40_RST_PIN			0x04
 
 /* Clear Channel Assessment (CCA) modes */
-#define MRF24J40_CCA_MODE1		0x02 // Energy Above Threshold
-#define MRF24J40_CCA_MODE2		0x01 // Carrier Sense Only
-#define MRF24J40_CCA_MODE3		0x03 // Carrier Sense With Energy Above Threshold
+#define MRF24J40_CCA_MODE1			0x02 // Energy Above Threshold
+#define MRF24J40_CCA_MODE2			0x01 // Carrier Sense Only
+#define MRF24J40_CCA_MODE3			0x03 // Carrier Sense With Energy Above Threshold
 
 /* Reception modes */
-#define MRF24J40_RXMODE_NORMAL		0x00
-#define MRF24J40_RXMODE_ERROR		0x02
-#define MRF24J40_RXMODE_PROMISCUOUS	0x01
+#define MRF24J40_RXMODE_NORMAL			0x00
+#define MRF24J40_RXMODE_ERROR			0x02
+#define MRF24J40_RXMODE_PROMISCUOUS		0x01
 
 /* Reception filters */
-#define MRF24J40_RXFILTER_ALL		0x00
-#define MRF24J40_RXFILTER_CMD		0x04
-#define MRF24J40_RXFILTER_DATA		0x02
-#define MRF24J40_RXFILTER_BEACON	0x01
+#define MRF24J40_RXFILTER_ALL			0x00
+#define MRF24J40_RXFILTER_CMD			0x04
+#define MRF24J40_RXFILTER_DATA			0x02
+#define MRF24J40_RXFILTER_BEACON		0x01
 
 /* TRX states */
-#define MRF24J40_TX_ON			0x01
-#define MRF24J40_RX_ON			0x02
-#define MRF24J40_TRX_OFF		0x03
-#define MRF24J40_FORCE_TRX_OFF		0x04
+#define MRF24J40_TX_ON				0x01
+#define MRF24J40_RX_ON				0x02
+#define MRF24J40_TRX_OFF			0x03
+#define MRF24J40_FORCE_TRX_OFF			0x04
 
 /* Battery low-voltage threshold masks */
-#define MRF24J40_BATTH_3V5		0x0E
-#define MRF24J40_BATTH_3V3		0x0D
-#define MRF24J40_BATTH_3V2		0x0C
-#define MRF24J40_BATTH_3V1		0x0B
-#define MRF24J40_BATTH_2V8		0x0A
-#define MRF24J40_BATTH_2V7		0x09
-#define MRF24J40_BATTH_2V6		0x08
-#define MRF24J40_BATTH_2V5		0x07
-#define MRF24J40_BATTH_UNDEF		0x06
+#define MRF24J40_BATTH_3V5			0x0E
+#define MRF24J40_BATTH_3V3			0x0D
+#define MRF24J40_BATTH_3V2			0x0C
+#define MRF24J40_BATTH_3V1			0x0B
+#define MRF24J40_BATTH_2V8			0x0A
+#define MRF24J40_BATTH_2V7			0x09
+#define MRF24J40_BATTH_2V6			0x08
+#define MRF24J40_BATTH_2V5			0x07
+#define MRF24J40_BATTH_UNDEF			0x06
+
+/* Security suites */
+#define MRF24J40_SECURITY_NONE			0x00
+#define MRF24J40_SECURITY_AES_CTR		0x01
+#define MRF24J40_SECURITY_AES_CCM128		0x02
+#define MRF24J40_SECURITY_AES_CCM64		0x03
+#define MRF24J40_SECURITY_AES_CCM32		0x04
+#define MRF24J40_SECURITY_AES_CBC_MAC128	0x05
+#define MRF24J40_SECURITY_AES_CBC_MAC64		0x06
+#define MRF24J40_SECURITY_AES_CBC_MAC32		0x07
 
 /*
  * ATTENTION These functions need to be implemented by the user!
@@ -116,6 +126,9 @@ uint8_t mrf24j40_rd_rxfifo(void);
 void    mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t buf_len);
 
 void    mrf24j40_config_mac_timer(uint16_t ticks);
+
+void mrf24j40_encrypt_mac(uint16_t fifo, uint8_t suite, uint8_t *key);
+void mrf24j40_decrypt_mac(uint8_t suite, uint8_t *key);
 
 void    mrf24j40_config_batmon(uint8_t threshold);
 uint8_t mrf24j40_battery_status(void);
