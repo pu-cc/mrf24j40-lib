@@ -104,8 +104,28 @@ uint8_t mrf24j40_isr_handler(void)
 	return irqmsk;
 }
 
+uint8_t mrf24j40_test_prototypes(void)
+{
+	uint8_t err;
+
+	err = (!mrf24j40_rd_short) ? 1 : 0;
+	err += (!mrf24j40_wr_short) ? 1 : 0;
+	err += (!mrf24j40_rd_long) ? 1 : 0;
+	err += (!mrf24j40_wr_long) ? 1 : 0;
+	err += (!mrf24j40_rd_fifo) ? 1 : 0;
+	err += (!mrf24j40_wr_fifo) ? 1 : 0;
+	err += (!mrf24j40_pin_ctrl) ? 1 : 0;
+	err += (!mrf24j40_delay_ms) ? 1 : 0;
+	err += (!mrf24j40_delay_us) ? 1 : 0;
+	err += (!mrf24j40_rnd) ? 1 : 0;
+
+	return err;
+}
+
 void mrf24j40_init(void)
 {
+	/* TODO check if platform-specific prototypes are set */
+
 	/* perform hard- and software reset */
 	mrf24j40_hwrst();
 	mrf24j40_swrst(0x07, 0);

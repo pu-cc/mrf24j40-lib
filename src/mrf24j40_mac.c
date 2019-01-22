@@ -25,7 +25,7 @@
 void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb)
 {
 	/* disassociation attempts using the MLME-DISASSOCIATE.request primitive will need to be made a priori */
-	
+
 	mlme_reset_cnf_t cnf;
 	mrf24j40_set_trxstate(MRF24J40_TRX_OFF);
 

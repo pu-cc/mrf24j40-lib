@@ -75,16 +75,17 @@
 /*
  * ATTENTION These functions need to be implemented by the user!
  */
-extern uint8_t mrf24j40_rd_short(uint8_t addr);
-extern void    mrf24j40_wr_short(uint8_t addr, uint8_t data);
-extern uint8_t mrf24j40_rd_long(uint16_t addr);
-extern void    mrf24j40_wr_long(uint16_t addr, uint8_t data);
-extern void    mrf24j40_rd_fifo(uint16_t addr, uint8_t *data, uint8_t len);
-extern void    mrf24j40_wr_fifo(uint16_t addr, uint8_t *data, uint8_t len);
-extern void    mrf24j40_pin_ctrl(uint8_t pin_mask, uint8_t pin_state);
-extern void    mrf24j40_delay_ms(const double ms);
-extern void    mrf24j40_delay_us(const double us);
-extern uint8_t mrf24j40_rnd(void);
+extern uint8_t mrf24j40_rd_short(uint8_t addr) __attribute__((weak));
+extern void    mrf24j40_wr_short(uint8_t addr, uint8_t data) __attribute__((weak));
+extern uint8_t mrf24j40_rd_long(uint16_t addr) __attribute__((weak));
+extern void    mrf24j40_wr_long(uint16_t addr, uint8_t data) __attribute__((weak));
+extern void    mrf24j40_rd_fifo(uint16_t addr, uint8_t *data, uint8_t len) __attribute__((weak));
+extern void    mrf24j40_wr_fifo(uint16_t addr, uint8_t *data, uint8_t len) __attribute__((weak));
+extern void    mrf24j40_pin_ctrl(uint8_t pin_mask, uint8_t pin_state) __attribute__((weak));
+extern void    mrf24j40_delay_ms(const double ms) __attribute__((weak));
+extern void    mrf24j40_delay_us(const double us) __attribute__((weak));
+extern uint8_t mrf24j40_rnd(void) __attribute__((weak));
+
 
 /*
  * Public functions
