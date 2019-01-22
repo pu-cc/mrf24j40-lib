@@ -25,8 +25,8 @@
 /* ATTENTION These registers need to be allocated by the user! */
 extern uint8_t mrf24j40_rxfifo[144];
 extern uint8_t mrf24j40_txfifo[128];
-//extern uint8_t aes_key[16];
-//extern uint8_t aes_nonce[13];
+extern uint8_t aes_key[16];
+extern uint8_t aes_nonce[13];
 
 void mrf24j40_hwrst(void)
 {
