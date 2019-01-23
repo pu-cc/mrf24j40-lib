@@ -28,7 +28,10 @@ extern uint8_t mrf24j40_txfifo[128];
 extern uint8_t aes_key[16];
 extern uint8_t aes_nonce[13];
 
-/* security engine */
+/* MAC Half Symbol Timer */
+static uint32_t mrf24j40_hsymtmr_ticks;
+
+/* Security Engine */
 static uint8_t mrf24j40_security_suite = 0;
 
 void mrf24j40_hwrst(void)
@@ -81,7 +84,7 @@ uint8_t mrf24j40_isr_handler(void)
 	}
 	if (irqmsk & MRF24J40_IRQ_HSYMTMRIF)
 	{
-		/* TODO implement timer */
+		mrf24j40_config_mac_hsymtmr(mrf24j40_hsymtmr_ticks);
 	}
 	if (irqmsk & MRF24J40_IRQ_SECIF)
 	{
@@ -588,11 +591,14 @@ void mrf24j40_wr_txfifo(uint16_t fifo, uint8_t *buf, uint8_t hdr_len, uint8_t bu
 	}
 }
 
-void mrf24j40_config_mac_timer(uint16_t ticks)
+void mrf24j40_config_mac_hsymtmr(uint32_t ticks /* 8us per tick */)
 {
 	uint8_t reg;
+	mrf24j40_hsymtmr_ticks = ticks;
 
-	/* timer starts when a value is written to HSYMTMRH */
+	ticks = (ticks > 0xffff) ? 0xffff : ticks;
+
+	/* timer starts as soon as a value is written to HSYMTMRH */
 	mrf24j40_wr_short(MRF24J40_R_HSYMTMRL, ticks);
 	mrf24j40_wr_short(MRF24J40_R_HSYMTMRH, ticks >> 8);
 
@@ -604,6 +610,9 @@ void mrf24j40_config_mac_timer(uint16_t ticks)
 		MRF24J40_SET_HSYMTMR(reg, (ticks ? 0 : 1));
 		mrf24j40_wr_short(MRF24J40_R_INTCON, reg);
 	}
+
+	/* update global ticks value */
+	mrf24j40_hsymtmr_ticks -= ticks;
 }
 
 void mrf24j40_encrypt_mac(uint16_t fifo, uint8_t suite, uint8_t *key)
