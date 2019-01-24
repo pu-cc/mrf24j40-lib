@@ -129,6 +129,7 @@ void    mrf24j40_config_mac_hsymtmr(uint32_t ticks);
 
 void    mrf24j40_encrypt_mac(uint16_t fifo, uint8_t suite, uint8_t *key);
 void    mrf24j40_decrypt_mac(uint8_t suite, uint8_t *key);
+void    mrf24j40_upper_layer_security(uint8_t enc, uint8_t suite, uint8_t *nonce, uint8_t *key);
 
 void    mrf24j40_config_batmon(uint8_t threshold);
 uint8_t mrf24j40_battery_status(void);

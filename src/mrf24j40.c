@@ -696,6 +696,40 @@ void mrf24j40_decrypt_mac(uint8_t suite, uint8_t *key)
 	mrf24j40_wr_short(MRF24J40_R_SECCON0, reg);
 }
 
+void mrf24j40_upper_layer_security(uint8_t enc, uint8_t suite, uint8_t *nonce, uint8_t *key)
+{
+	uint8_t reg;
+
+	/* load the 13 byte NONCE value */
+	mrf24j40_wr_fifo(MRF24J40_R_UPNONCE0, nonce, 13);
+
+	/* load the 128-bit security key */
+	mrf24j40_wr_fifo(MRF24J40_KEY_TX_NORMAL, key, 16);
+
+	/* select the security suite */
+	reg = mrf24j40_rd_short(MRF24J40_R_SECCON0);
+	MRF24J40_SET_TXNCIPHER(reg, suite);
+	mrf24j40_wr_short(MRF24J40_R_SECCON0, reg);
+
+	/* enable upper layer encryption / decryption */
+	reg = mrf24j40_rd_short(MRF24J40_R_SECCR2);
+
+	if (enc) {
+		MRF24J40_SET_UPENC(reg, 1);
+	}
+	else {
+		MRF24J40_SET_UPDEC(reg, 1);
+	}
+
+	mrf24j40_wr_short(MRF24J40_R_SECCR2, reg);
+
+	/* trigger encryption / decryption */
+	reg = mrf24j40_rd_short(MRF24J40_R_TXNCON);
+	MRF24J40_SET_TXNTRIG(reg, 1);
+	MRF24J40_SET_TXNSECEN(reg, 1); // NOTE not mentioned in section 3.17.4
+	mrf24j40_wr_short(MRF24J40_R_TXNCON, reg);
+}
+
 void mrf24j40_config_batmon(uint8_t threshold)
 {
 	uint8_t reg;
