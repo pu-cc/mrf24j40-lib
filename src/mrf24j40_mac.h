@@ -166,7 +166,6 @@ void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
 /*
  * MLME-ASSOCIATE.response
  */
-
 typedef struct {
 	uint8_t *dev_addr;
 	uint8_t *assoc_s_addr;
@@ -181,7 +180,6 @@ mlme_associate_rsp_cb_t mlme_associate_rsp_cb(void);
 /*
  * MLME-ASSOCIATE.indication
  */
-
 typedef struct {
 	uint8_t *dev_addr;
 	uint8_t cap_info;
@@ -216,6 +214,40 @@ typedef struct {
 } mlme_associate_req_t;
 
 void mlme_associate_req(mlme_associate_req_t *req, mlme_associate_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-DISASSOCIATE.indication
+ */
+typedef struct {
+	uint8_t *dev_addr;
+	uint8_t reason;
+	uint8_t security_use;
+	uint8_t acl_entry;
+} mlme_disassociate_ind_t;
+
+void mlme_disassociate_ind(mlme_disassociate_ind_t *ind);
+
+/*
+ * MLME-DISASSOCIATE.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+} mlme_disassociate_cnf_t;
+
+typedef void (* mlme_disassociate_cnf_cb_t)(void);
+
+mlme_disassociate_cnf_cb_t mlme_disassociate_cnf_cb(void);
+
+/*
+ * MLME-DISASSOCIATE.request
+ */
+typedef struct {
+	uint8_t *dev_addr;
+	uint8_t reason;
+	uint8_t securtiy_en;
+} mlme_disassociate_req_t;
+
+void mlme_disassociate_req(mlme_disassociate_req_t *req, mlme_disassociate_cnf_cb_t cnf_cb);
 
 /*
  * MLME-RESET.confirm
