@@ -71,6 +71,14 @@ typedef enum {
 	MAC_ENUM_UNSUPPORTED_ATTRIBUTE
 } mac_enum_e;
 
+typedef enum {
+	MAC_ASSOC_SUCCESS = 0,
+	MAC_ASSOC_PAN_AT_CAPACITY,
+	MAC_ASSOC_PAN_ACCESS_DENIED
+	/* 0x03 – 0x7F: reserved */
+	/* 0x80 – 0xFF: reserved for MAC primitive enumeration values */
+} mac_assoc_status_e;
+
 /*
  * MCPS-SAP primitives: (*) optional for an RFD
  *
@@ -147,6 +155,67 @@ typedef struct {
 } mcps_purge_req_t;
 
 void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-SAP primitives: (*) optional for an RFD
+ *
+ * 1)  MLME-ASSOCIATE (req, cnf, ind*, rsp*)
+ * 7)  MLME-RESET (req, cnf)
+ */
+
+/*
+ * MLME-ASSOCIATE.response
+ */
+
+typedef struct {
+	uint8_t *dev_addr;
+	uint8_t *assoc_s_addr;
+	mac_assoc_status_e status;
+	uint8_t securtiy_en;
+} mlme_associate_rsp_t;
+
+typedef void (* mlme_associate_rsp_cb_t)(void);
+
+mlme_associate_rsp_cb_t mlme_associate_rsp_cb(void);
+
+/*
+ * MLME-ASSOCIATE.indication
+ */
+
+typedef struct {
+	uint8_t *dev_addr;
+	uint8_t cap_info;
+	uint8_t securtiy_use;
+	uint8_t acl_entry;
+} mlme_associate_ind_t;
+
+void mlme_associate_ind(mlme_associate_ind_t *ind, mlme_associate_rsp_cb_t rsp_cb);
+
+/*
+ * MLME-ASSOCIATE.confirm
+ */
+typedef struct {
+	uint8_t *assoc_s_addr;
+	mac_enum_e status;
+} mlme_associate_cnf_t;
+
+typedef void (* mlme_associate_cnf_cb_t)(void);
+
+mlme_associate_cnf_cb_t mlme_associate_cnf_cb(void);
+
+/*
+ * MLME-ASSOCIATE.request
+ */
+typedef struct {
+	uint8_t logical_channel;
+	uint8_t coord_addr_mode;
+	uint8_t coord_pan_id;
+	uint8_t *coord_addr;
+	uint8_t cap_info;
+	uint8_t securtiy_en;
+} mlme_associate_req_t;
+
+void mlme_associate_req(mlme_associate_req_t *req, mlme_associate_cnf_cb_t cnf_cb);
 
 /*
  * MLME-RESET.confirm
