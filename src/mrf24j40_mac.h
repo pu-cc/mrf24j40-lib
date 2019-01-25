@@ -72,6 +72,83 @@ typedef enum {
 } mac_enum_e;
 
 /*
+ * MCPS-SAP primitives: (*) optional for an RFD
+ *
+ * 1) MCPS-DATA (req, cnf, ind)
+ * 2) MCPS-PURGE (req*, cnf*)
+ */
+
+/*
+ * MCPS-DATA.indication
+ */
+typedef struct {
+	uint8_t src_addr_mode;
+	uint8_t *src_pan_id;
+	uint8_t *src_addr;
+	uint8_t dst_addr_mode;
+	uint8_t *dst_pan_id;
+	uint8_t *dst_addr;
+	uint8_t msdu_len;
+	uint8_t *msdu;
+	uint8_t mpdu_link_quality;
+	uint8_t security_use;
+	uint8_t acl_entry;
+} mcps_data_ind_t;
+
+void mcps_data_ind(mcps_data_ind_t *ind);
+
+/*
+ * MCPS-DATA.confirm
+ */
+typedef struct {
+	uint8_t msdu_hndl;
+	mac_enum_e status;
+} mcps_data_cnf_t;
+
+typedef void (* mcps_data_cnf_cb_t)(void);
+
+mcps_data_cnf_cb_t mcps_data_cnf_cb(void);
+
+/*
+ * MCPS-DATA.request
+ */
+typedef struct {
+	uint8_t src_addr_mode;
+	uint8_t *src_pan_id;
+	uint8_t *src_addr;
+	uint8_t dst_addr_mode;
+	uint8_t *dst_pan_id;
+	uint8_t *dst_addr;
+	uint8_t msdu_len;
+	uint8_t *msdu;
+	uint8_t msdu_hndl;
+	uint8_t tx_options;
+} mcps_data_req_t;
+
+void mcps_data_req(mcps_data_req_t *req, mcps_data_cnf_cb_t cnf_cb);
+
+/*
+ * MCPS-PURGE.confirm
+ */
+typedef struct {
+	uint8_t msdu_hndl;
+	mac_enum_e status;
+} mcps_purge_cnf_t;
+
+typedef void (* mcps_purge_cnf_cb_t)(void);
+
+mcps_purge_cnf_cb_t mcps_purge_cnf_cb(void);
+
+/*
+ * MCPS-PURGE.request
+ */
+typedef struct {
+	uint8_t msdu_hndl;
+} mcps_purge_req_t;
+
+void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
+
+/*
  * MLME-RESET.confirm
  */
 typedef struct {
