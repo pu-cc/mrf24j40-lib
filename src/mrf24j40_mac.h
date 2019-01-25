@@ -79,6 +79,20 @@ typedef enum {
 	/* 0x80 – 0xFF: reserved for MAC primitive enumeration values */
 } mac_assoc_status_e;
 
+typedef struct {
+	uint8_t coord_addr_mode;
+	uint8_t coord_pan_id;
+	uint8_t *coord_addr;
+	uint8_t logical_channel;
+	uint16_t superframe_spec;
+	uint8_t gts_permit;
+	uint8_t lq;
+	uint32_t timestamp;
+	uint8_t security_use;
+	uint8_t acl_entry;
+	uint8_t security_failure;
+} pandesc_t;
+
 /*
  * MCPS-SAP primitives: (*) optional for an RFD
  *
@@ -160,6 +174,8 @@ void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
  * MLME-SAP primitives: (*) optional for an RFD
  *
  * 1)  MLME-ASSOCIATE (req, cnf, ind*, rsp*)
+ * 2)  MLME-DISASSOCIATE (req, cnf, ind)
+ * 3)  MLME-BEACON-NOTIFY (ind)
  * 7)  MLME-RESET (req, cnf)
  */
 
@@ -248,6 +264,20 @@ typedef struct {
 } mlme_disassociate_req_t;
 
 void mlme_disassociate_req(mlme_disassociate_req_t *req, mlme_disassociate_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-BEACON-NOTIFY.indication
+ */
+typedef struct {
+	uint8_t bsn;
+	pandesc_t pandesc;
+	uint8_t pend_addr_spec;
+	uint8_t *addr_lst;
+	uint8_t sdu_len; /* MAC_MAX_BEACON_PAYLOAD_LENGTH: 52 */
+	uint8_t *sdu;
+} mlme_beacon_notify_ind_t;
+
+void mlme_beacon_notify_ind(mlme_beacon_notify_ind_t *ind);
 
 /*
  * MLME-RESET.confirm
