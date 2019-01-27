@@ -1,7 +1,7 @@
 /*
  * IEEE 802.15.4-2003 MAC sublayer service implementation
  *
- * Copyright (C) 2017, 2018 Patrick Urban <patrick.urban@web.de>
+ * Copyright (C) 2017, 2018, 2019 Patrick Urban <patrick.urban@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -176,6 +176,7 @@ void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
  * 1)  MLME-ASSOCIATE (req, cnf, ind*, rsp*)
  * 2)  MLME-DISASSOCIATE (req, cnf, ind)
  * 3)  MLME-BEACON-NOTIFY (ind)
+ * 4)  MLME-GET (req, cnf)
  * 7)  MLME-RESET (req, cnf)
  */
 
@@ -278,6 +279,28 @@ typedef struct {
 } mlme_beacon_notify_ind_t;
 
 void mlme_beacon_notify_ind(mlme_beacon_notify_ind_t *ind);
+
+/*
+ * MLME-GET.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+	uint8_t pib_attribute;
+	uint8_t *pib_value;
+} mlme_get_cnf_t;
+
+typedef void (* mlme_get_cnf_cb_t)(mlme_get_cnf_t *);
+
+//mlme_get_cnf_cb_t mlme_get_cnf_cb(mlme_get_cnf_t cnf);
+
+/*
+ * MLME-GET.request
+ */
+typedef struct {
+	uint8_t pib_attribute;
+} mlme_get_req_t;
+
+void mlme_get_req(mlme_get_req_t *req, mlme_get_cnf_cb_t cnf_cb);
 
 /*
  * MLME-RESET.confirm
