@@ -127,9 +127,9 @@ typedef struct {
 	mac_enum_e status;
 } mcps_data_cnf_t;
 
-typedef void (* mcps_data_cnf_cb_t)(void);
+typedef void (* mcps_data_cnf_cb_t)(mcps_data_cnf_t *);
 
-mcps_data_cnf_cb_t mcps_data_cnf_cb(void);
+//mcps_data_cnf_cb_t mcps_data_cnf_cb(mcps_data_cnf_t cnf);
 
 /*
  * MCPS-DATA.request
@@ -157,9 +157,9 @@ typedef struct {
 	mac_enum_e status;
 } mcps_purge_cnf_t;
 
-typedef void (* mcps_purge_cnf_cb_t)(void);
+typedef void (* mcps_purge_cnf_cb_t)(mcps_purge_cnf_t *);
 
-mcps_purge_cnf_cb_t mcps_purge_cnf_cb(void);
+//mcps_purge_cnf_cb_t mcps_purge_cnf_cb(mcps_purge_cnf_t );
 
 /*
  * MCPS-PURGE.request
@@ -192,7 +192,7 @@ typedef struct {
 
 typedef void (* mlme_associate_rsp_cb_t)(void);
 
-mlme_associate_rsp_cb_t mlme_associate_rsp_cb(void);
+//mlme_associate_rsp_cb_t mlme_associate_rsp_cb(void);
 
 /*
  * MLME-ASSOCIATE.indication
@@ -214,9 +214,9 @@ typedef struct {
 	mac_enum_e status;
 } mlme_associate_cnf_t;
 
-typedef void (* mlme_associate_cnf_cb_t)(void);
+typedef void (* mlme_associate_cnf_cb_t)(mlme_associate_cnf_t *);
 
-mlme_associate_cnf_cb_t mlme_associate_cnf_cb(void);
+//mlme_associate_cnf_cb_t mlme_associate_cnf_cb(mlme_associate_cnf_t cnf);
 
 /*
  * MLME-ASSOCIATE.request
@@ -251,9 +251,9 @@ typedef struct {
 	mac_enum_e status;
 } mlme_disassociate_cnf_t;
 
-typedef void (* mlme_disassociate_cnf_cb_t)(void);
+typedef void (* mlme_disassociate_cnf_cb_t)(mlme_disassociate_cnf_t *);
 
-mlme_disassociate_cnf_cb_t mlme_disassociate_cnf_cb(void);
+//mlme_disassociate_cnf_cb_t mlme_disassociate_cnf_cb(mlme_disassociate_cnf_t cnf);
 
 /*
  * MLME-DISASSOCIATE.request
@@ -311,7 +311,7 @@ typedef struct {
 
 typedef void (* mlme_reset_cnf_cb_t)(mlme_reset_cnf_t *);
 
-mlme_reset_cnf_cb_t mlme_reset_cnf_cb(mlme_reset_cnf_t cnf);
+//mlme_reset_cnf_cb_t mlme_reset_cnf_cb(mlme_reset_cnf_t cnf);
 
 /*
  * MLME-RESET.request
