@@ -177,7 +177,12 @@ void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
  * 2)  MLME-DISASSOCIATE (req, cnf, ind)
  * 3)  MLME-BEACON-NOTIFY (ind)
  * 4)  MLME-GET (req, cnf)
+ * 5)  -
+ * 6)  -
  * 7)  MLME-RESET (req, cnf)
+ * 8)  MLME-RX-ENABLE (req, cnf)
+ * 9)  MLME-SCAN (req, cnf)
+ * 10) MLME-COMM-STATUS (ind)
  */
 
 /*
@@ -303,6 +308,26 @@ typedef struct {
 void mlme_get_req(mlme_get_req_t *req, mlme_get_cnf_cb_t cnf_cb);
 
 /*
+ * MLME-RESET.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+} mlme_reset_cnf_t;
+
+typedef void (* mlme_reset_cnf_cb_t)(mlme_reset_cnf_t *);
+
+//mlme_reset_cnf_cb_t mlme_reset_cnf_cb(mlme_reset_cnf_t cnf);
+
+/*
+ * MLME-RESET.request
+ */
+typedef struct {
+	uint8_t set_default_pib;
+} mlme_reset_req_t;
+
+void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb);
+
+/*
  * MLME-RX-ENABLE.confirm
  */
 typedef struct {
@@ -323,26 +348,6 @@ typedef struct {
 } mlme_rx_enable_req_t;
 
 void mlme_rx_enable_req(mlme_rx_enable_req_t *req, mlme_rx_enable_cnf_cb_t cnf_cb);
-
-/*
- * MLME-RESET.confirm
- */
-typedef struct {
-	mac_enum_e status;
-} mlme_reset_cnf_t;
-
-typedef void (* mlme_reset_cnf_cb_t)(mlme_reset_cnf_t *);
-
-//mlme_reset_cnf_cb_t mlme_reset_cnf_cb(mlme_reset_cnf_t cnf);
-
-/*
- * MLME-RESET.request
- */
-typedef struct {
-	uint8_t set_default_pib;
-} mlme_reset_req_t;
-
-void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb);
 
 /*
  * MLME-SCAN.confirm
@@ -370,6 +375,20 @@ typedef struct {
 } mlme_scan_req_t;
 
 void mlme_scan_req(mlme_scan_req_t *req, mlme_scan_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-COMM-STATUS.indication
+ */
+typedef struct {
+	uint8_t *pan_id;
+	uint8_t src_addr_mode;
+	uint8_t *src_addr;
+	uint8_t dst_addr_mode;
+	uint8_t *dst_addr;
+	mac_enum_e status;
+} mlme_comm_status_ind_t;
+
+void mlme_comm_status_ind(mlme_comm_status_ind_t *ind);
 
 /*
  * MAC PIB (PAN information base)
