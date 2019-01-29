@@ -303,6 +303,28 @@ typedef struct {
 void mlme_get_req(mlme_get_req_t *req, mlme_get_cnf_cb_t cnf_cb);
 
 /*
+ * MLME-RX-ENABLE.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+} mlme_rx_enable_cnf_t;
+
+typedef void (* mlme_rx_enable_cnf_cb_t)(mlme_rx_enable_cnf_t *);
+
+//mlme_rx_enable_cnf_cb_t mlme_rx_enable_cnf_cb(mlme_rx_enable_cnf_t cnf);
+
+/*
+ * MLME-RX-ENABLE.request
+ */
+typedef struct {
+	uint8_t defer_permit;
+	uint32_t rx_on_time;
+	uint32_t rx_on_duration;
+} mlme_rx_enable_req_t;
+
+void mlme_rx_enable_req(mlme_rx_enable_req_t *req, mlme_rx_enable_cnf_cb_t cnf_cb);
+
+/*
  * MLME-RESET.confirm
  */
 typedef struct {
@@ -321,6 +343,33 @@ typedef struct {
 } mlme_reset_req_t;
 
 void mlme_reset_req(mlme_reset_req_t *req, mlme_reset_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-SCAN.confirm
+ */
+typedef struct {
+	mac_enum_e status;
+	uint8_t scan_type;
+	uint32_t unscanned_channels;
+	uint8_t result_list_size;
+	uint8_t *ed_list;
+	pandesc_t *pandesc_list;
+} mlme_scan_cnf_t;
+
+typedef void (* mlme_scan_cnf_cb_t)(mlme_scan_cnf_t *);
+
+//mlme_scan_cnf_cb_t mlme_scan_cnf_cb(mlme_scan_cnf_t cnf);
+
+/*
+ * MLME-SCAN.request
+ */
+typedef struct {
+	uint8_t scan_type;
+	uint32_t scan_channels;
+	uint8_t scan_duration;
+} mlme_scan_req_t;
+
+void mlme_scan_req(mlme_scan_req_t *req, mlme_scan_cnf_cb_t cnf_cb);
 
 /*
  * MAC PIB (PAN information base)
