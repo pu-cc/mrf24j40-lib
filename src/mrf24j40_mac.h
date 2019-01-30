@@ -177,8 +177,8 @@ void mcps_purge_req(mcps_purge_req_t *req, mcps_purge_cnf_cb_t cnf_cb);
  * 2)  MLME-DISASSOCIATE (req, cnf, ind)
  * 3)  MLME-BEACON-NOTIFY (ind)
  * 4)  MLME-GET (req, cnf)
- * 5)  -
- * 6)  -
+ * 5)  MLME-GTS (req*, cnf*, ind*)
+ * 6)  MLME-ORPHAN (ind*, rsp*)
  * 7)  MLME-RESET (req, cnf)
  * 8)  MLME-RX-ENABLE (req, cnf)
  * 9)  MLME-SCAN (req, cnf)
@@ -195,9 +195,9 @@ typedef struct {
 	uint8_t securtiy_en;
 } mlme_associate_rsp_t;
 
-typedef void (* mlme_associate_rsp_cb_t)(void);
+typedef void (* mlme_associate_rsp_cb_t)(mlme_associate_rsp_t *);
 
-//mlme_associate_rsp_cb_t mlme_associate_rsp_cb(void);
+//mlme_associate_rsp_cb_t mlme_associate_rsp_cb(mlme_associate_rsp_t rsp_cb);
 
 /*
  * MLME-ASSOCIATE.indication
@@ -306,6 +306,65 @@ typedef struct {
 } mlme_get_req_t;
 
 void mlme_get_req(mlme_get_req_t *req, mlme_get_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-GTS.indication
+ */
+typedef struct {
+	uint8_t *dev_addr;
+	uint8_t gts_char;
+	uint8_t security_use;
+	uint8_t acl_entry;
+} mlme_gts_ind_t;
+
+void mlme_gts_ind(mlme_gts_ind_t *ind);
+
+/*
+ * MLME-GTS.confirm
+ */
+typedef struct {
+	uint8_t gts_char;
+	mac_enum_e status;
+} mlme_gts_cnf_t;
+
+typedef void (* mlme_gts_cnf_cb_t)(mlme_gts_cnf_t *);
+
+//mlme_gts_cnf_cb_t mlme_gts_cnf_cb(mlme_gts_cnf_t cnf);
+
+/*
+ * MLME-GTS.request
+ */
+typedef struct {
+	uint8_t gts_char;
+	uint8_t securtiy_en;
+} mlme_gts_req_t;
+
+void mlme_gts_req(mlme_gts_req_t *req, mlme_gts_cnf_cb_t cnf_cb);
+
+/*
+ * MLME-ORPHAN.response
+ */
+typedef struct {
+	uint8_t *orphan_addr;
+	uint8_t security_use;
+	uint8_t acl_entry;
+} mlme_orphan_rsp_t;
+
+typedef void (* mlme_orphan_rsp_cb_t)(mlme_orphan_rsp_t *);
+
+//mlme_orphan_rsp_cb_t mlme_orphan_rsp_cb(mlme_orphan_rsp_t rsp_cb);
+
+/*
+ * MLME-ORPHAN.indication
+ */
+typedef struct {
+	uint8_t *orphan_addr;
+	uint8_t *orphan_s_addr;
+	uint8_t assoc_member;
+	uint8_t security_en;
+} mlme_orphan_ind_t;
+
+void mlme_orphan_ind(mlme_orphan_ind_t *ind);
 
 /*
  * MLME-RESET.confirm
